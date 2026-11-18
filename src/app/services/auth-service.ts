@@ -5,6 +5,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { ErrorsService } from './tools/errors-service';
 import { ValidatorService } from './tools/validator-service';
 import { environment } from '../../environments/environment';
+import { Observable } from 'rxjs';
 
 //Estas son variables para las cookies
 const session_cookie_name = 'sistema-escolar-token';
@@ -23,6 +24,48 @@ export class AuthService {
   private router = inject(Router);
   private validatorService = inject(ValidatorService);
   private errorService =  inject(ErrorsService);
+
+  //Función para validar el usuario y la contraseña, y si son correctos, guardar los datos del usuario en cookies y redirigir a la página principal
+  public validarLogin(username: string, password: string){
+     const data = {
+       "username": username,
+       "password": password
+     };
+     const error: any = {};
+
+     if(!this.validatorService.required(data["username"])){
+       error["username"] = this.errorService.required;
+     }else if(!this.validatorService.max(data["username"], 40)){
+       error["username"] = this.errorService.max(40);
+     }else if (!this.validatorService.email(data['username'])) {
+       error['username'] = this.errorService.email;
+     }
+
+     if(!this.validatorService.required(data["password"])){
+       error["password"] = this.errorService.required;
+     }
+
+     return error;
+
+  }
+
+  //Definir la función para enviar la solicitud de login al servidor y manejar la respuesta
+  public login(username: string, password: string){
+    const data = {
+      "username": username,
+      "password": password
+    };
+    const jsonHeaders = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
+
+    return this.http.post<any>(`${environment.url_api}/login/`, data, jsonHeaders);
+  }
+
+  //Cerrar sesión
+  public logout(): Observable<any> {
+    const token = this.getSessionToken();
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' , 'Authorization': 'Bearer '+token});
+    return this.http.get<any>(`${environment.url_api}/logout/`, { headers });
+  }
 
   // Funciones para manejar las cookies de sesión y autenticación del usuario
 
