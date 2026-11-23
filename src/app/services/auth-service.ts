@@ -133,4 +133,39 @@ export class AuthService {
   public getUserRole(){
     return this.cookieService.get(role_name_cookie_name);
   }
+
+  // ---- Role helpers (fuente única de verdad para toda la app) ----
+
+  isAdmin(): boolean {
+    return this.getUserRole() === 'administrador';
+  }
+
+  isTeacher(): boolean {
+    return this.getUserRole() === 'maestro';
+  }
+
+  isStudent(): boolean {
+    return this.getUserRole() === 'alumno';
+  }
+
+  canSeeAdminItems(): boolean {
+    return this.isAdmin();
+  }
+
+  canSeeTeacherItems(): boolean {
+    return this.isAdmin() || this.isTeacher();
+  }
+
+  canSeeStudentItems(): boolean {
+    return this.isAdmin() || this.isTeacher() || this.isStudent();
+  }
+
+  canSeeHomeItem(): boolean {
+    return this.isAdmin() || this.isTeacher();
+  }
+
+  canSeeRegisterItem(): boolean {
+    return this.isAdmin() || this.isTeacher();
+  }
+
 }
