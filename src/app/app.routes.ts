@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { DashboardLayout } from './layout/dashboard-layout/dashboard-layout';
 import { AuthLayout } from './layout/auth-layout/auth-layout';
 import { authGuard } from './guards/auth.guard';
+import { publicGuard } from './guards/public.guard';
+import { registerGuard } from './guards/registrer-users.guard';
 
 export const routes: Routes = [
 
@@ -12,16 +14,20 @@ export const routes: Routes = [
       { path: '', redirectTo: 'login', pathMatch: 'full' },
       {
         path: 'login',
+        canActivate: [publicGuard],
         loadComponent: () => import('./screens/login-screen/login-screen').then(m => m.LoginScreen),
       },
       {
         path: 'registro-usuarios',
+        canActivate: [registerGuard],
         loadComponent: () => import('./screens/registro-usuarios-screen/registro-usuarios-screen').then(m => m.RegistroUsuariosScreen),
       },
-      {
-        path: 'registro-usuarios/:rol/:id',
-        loadComponent: () => import('./screens/registro-usuarios-screen/registro-usuarios-screen').then(m => m.RegistroUsuariosScreen),
-      },
+      // Ruta de edición temporalmente desactivada porque requiere parámetros dinámicos
+      // durante el prerenderizado. Se habilitará cuando se configure su renderMode.
+      // {
+      //   path: 'registro-usuarios/:rol/:id',
+      //   loadComponent: () => import('./screens/registro-usuarios-screen/registro-usuarios-screen').then(m => m.RegistroUsuariosScreen),
+      // },
     ]
   },
 

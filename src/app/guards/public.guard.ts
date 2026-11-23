@@ -2,18 +2,20 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth-service';
 
-export const publicGuard: CanActivateFn = (route, state) => {
+// Evita que un usuario autenticado acceda a pantallas públicas como el login.
+export const publicGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  // El token se almacena en una cookie cuando el usuario inicia sesión.
   const token = authService.getSessionToken();
 
-  // Validamos que el token exista y no sea un string vacío
-  if (token && token.trim() !== '') {
-    console.log('Public Guard: Token detectado, redirigiendo al home...'); // Esto te ayudará a depurar
-    router.navigate(['/app/home']);
-    return false;
-  }
-
-  return true;
+  /*
+   * - Un UrlTree redirige mediante el Router sin navegación manual.
+   * - true permite acceder a la ruta pública.
+   * - Se usa trim() para considerar inválido un token que solo tenga espacios.
+   */
+  return token?.trim()
+    ? router.createUrlTree(['/home'])
+    : true;
 };

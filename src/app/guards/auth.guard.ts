@@ -1,37 +1,36 @@
 import { inject } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth-service';
 
-export const authUserGuard: CanActivateFn = (route, state) => {
+// Protege rutas que requieren una sesión activa y, opcionalmente, roles específicos.
+export const authGuard: CanActivateFn = (route) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // 1. Verificación de Autenticación (¿Está logueado?)
-  if (!authService.getSessionToken()) {
-    // Si no hay token, lo pateamos al login
-    console.log('No estas autenticado')
-    router.navigate(['/login']);
-    return false;
+  // Un token vacío o inexistente indica que el usuario no ha iniciado sesión.
+  const token = authService.getSessionToken();
+
+  if (!token?.trim()) {
+    return router.createUrlTree(['/login']);
   }
 
-  // 2. Verificación de Roles (¿Tiene permiso para esta pantalla en específico?)
-  const expectedRoles: string[] = route.data['expectedRoles'];
+  /*
+   * Los roles permitidos pueden configurarse en la propiedad "data" de la ruta.
+   * Si la ruta no los define, cualquier usuario autenticado puede acceder.
+   */
+  const expectedRoles = route.data['expectedRoles'] as string[] | undefined;
 
-  // Si la ruta no especifica roles, significa que cualquier usuario logueado puede entrar
   if (!expectedRoles || expectedRoles.length === 0) {
     return true;
   }
 
-  const userGroup = authService.getUserRole(); // 'administrador', 'maestro', o 'alumno'
+  const userRole = authService.getUserRole();
 
-  // Si el rol del usuario está en la lista de roles permitidos de la ruta
-  if (expectedRoles.includes(userGroup)) {
-    console.log(userGroup);
+  // El usuario puede entrar si su rol está incluido entre los permitidos.
+  if (expectedRoles.includes(userRole)) {
     return true;
-  } else {
-    // Si está logueado pero NO tiene el rol, lo mandamos al inicio
-    console.log('No perteneces a este rol')
-    router.navigate(['/app/home']);
-    return false;
   }
+
+  // Si está autenticado, pero no autorizado, se redirige al inicio.
+  return router.createUrlTree(['/home']);
 };

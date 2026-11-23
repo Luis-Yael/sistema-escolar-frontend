@@ -1,23 +1,18 @@
-import { Component, HostListener, inject, OnInit } from '@angular/core';
-import { SHARED_IMPORTS } from '../../shared/shared.imports';
-import { Router } from 'express';
+import { Component, EventEmitter, HostListener, inject, OnInit, Output } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth-service';
 
 @Component({
   selector: 'app-navbar-user',
-  imports: [
-    ...SHARED_IMPORTS
-  ],
+  imports: [MatIconModule],
   templateUrl: './navbar-user.html',
   styleUrl: './navbar-user.scss',
 })
 export class NavbarUser implements OnInit {
+  @Output() sidebarToggle = new EventEmitter<void>();
 
-  public expandedMenu: string | null = null;
   public userInitial = '';
   public isMobileView = false;
-  public showUserMenu = false;
-  public mobileOpen = false;
 
   paletteMode: 'light' | 'dark' = 'light';
 
@@ -40,7 +35,6 @@ export class NavbarUser implements OnInit {
     }
   };
 
-  private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
 
   constructor() {
@@ -61,9 +55,6 @@ export class NavbarUser implements OnInit {
   @HostListener('window:resize')
   onResize(): void {
     this.isMobileView = window.innerWidth <= 992;
-    if (!this.isMobileView) {
-      this.mobileOpen = false;
-    }
   }
 
   togglePalette(): void {
@@ -86,54 +77,7 @@ export class NavbarUser implements OnInit {
     document.documentElement.setAttribute('data-theme', mode);
   }
 
-  toggleSidebar(): void {
-    this.mobileOpen = !this.mobileOpen;
+  requestSidebarToggle(): void {
+    this.sidebarToggle.emit();
   }
-
-  closeSidebar(): void {
-    this.mobileOpen = false;
-  }
-
-  toggleUserMenu(): void {
-    this.showUserMenu = !this.showUserMenu;
-  }
-
-  editUser(): void {
-    const userId = this.authService.getUserId();
-    const userRole = this.authService.getUserRole();
-    this.router.navigate(['/registro-usuarios', userRole, userId]);
-    this.showUserMenu = false;
-  }
-
-  toggleMenu(menu: string): void {
-    this.expandedMenu = this.expandedMenu === menu ? null : menu;
-  }
-
-  closeMenu(): void {
-    this.expandedMenu = null;
-  }
-
-  logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.authService.destroyUser();
-        this.router.navigate(['/inicio']);
-        this.closeSidebar();
-      },
-      error: () => {
-        this.authService.destroyUser();
-        this.router.navigate(['/inicio']);
-        this.closeSidebar();
-      }
-    });
-  }
-
-  isAdmin(): boolean { return this.authService.isAdmin(); }
-  isTeacher(): boolean { return this.authService.isTeacher(); }
-  isStudent(): boolean { return this.authService.isStudent(); }
-  canSeeAdminItems(): boolean { return this.authService.canSeeAdminItems(); }
-  canSeeTeacherItems(): boolean { return this.authService.canSeeTeacherItems(); }
-  canSeeStudentItems(): boolean { return this.authService.canSeeStudentItems(); }
-  canSeeHomeItem(): boolean { return this.authService.canSeeHomeItem(); }
-  canSeeRegisterItem(): boolean { return this.authService.canSeeRegisterItem(); }
 }

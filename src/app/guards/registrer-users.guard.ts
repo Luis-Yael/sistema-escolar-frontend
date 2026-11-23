@@ -2,28 +2,28 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth-service';
 
-export const registerGuard: CanActivateFn = (route, state) => {
+// Controla quién puede acceder al formulario de registro de usuarios.
+export const registerGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  // Si no existe token, se trata de un visitante realizando un registro público.
   const token = authService.getSessionToken();
 
-  // 1. Si NO está logueado, lo dejamos pasar sin problema (usuario nuevo / público)
-  if (!token || token.trim() === '') {
+  if (!token?.trim()) {
     return true;
   }
 
-  // 2. Si SÍ está logueado, obtenemos su rol para evaluar
-  const userGroup = authService.getUserRole(); // 'administrador', 'maestro' o 'alumno'
+  // Un usuario autenticado debe tener un rol autorizado para registrar cuentas.
+  const userRole = authService.getUserRole();
 
-  // Si es administrador o maestro, los dejamos entrar a registrar a alguien más
-  if (userGroup === 'administrador' || userGroup === 'maestro') {
+  if (userRole === 'administrador' || userRole === 'maestro') {
     return true;
   }
 
-  // 3. Si llega hasta aquí, significa que está logueado pero es 'alumno' (o un rol no reconocido).
-  // Lo rebotamos al home.
-  console.warn('Acceso denegado: Los alumnos no pueden acceder al registro.');
-  router.navigate(['/home']);
-  return false;
+  /*
+   * Los alumnos y los roles desconocidos no pueden registrar usuarios.
+   * Devolvemos un UrlTree para que Angular realice la redirección directamente.
+   */
+  return router.createUrlTree(['/home']);
 };
