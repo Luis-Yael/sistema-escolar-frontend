@@ -1,0 +1,172 @@
+/* =========================
+   admin-screen.scss
+   Mobile first: los estilos base son para pantallas chicas
+   y los media queries (min-width) los amplían.
+   ========================= */
+
+$color-texto: #231F20;
+$color-editar: #0092B8;
+$color-editar-hover: #006179;
+$color-eliminar: #E84150;
+$color-eliminar-hover: #ce1626;
+$sombra-card: 0 4px 24px rgba(0, 0, 0, 0.07);
+
+/* El margen del sidebar ya lo aplica .dashboard-content en el layout;
+   repetirlo aquí duplicaba el espacio a la izquierda. */
+.wrapper {
+  height: auto;
+}
+
+.header-home-admin,
+.body-admin {
+  display: flex;
+  width: 100%;
+}
+
+.header-home-admin {
+  align-items: center;
+}
+
+.body-admin {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Saludo y tabla comparten el mismo borde izquierdo: sin gutters de Bootstrap */
+.row {
+  --bs-gutter-x: 0;
+}
+
+.container {
+  max-width: 100%;
+  padding: 0;
+}
+
+/* =========================
+   Títulos (saludo/rol y card)
+   ========================= */
+.title-perfil,
+.title-table {
+  display: block;
+  margin-left: 0;
+  font-family: Nexa-Bold;
+  line-height: 1.15;
+  color: $color-texto;
+  text-align: center;
+  text-transform: capitalize;
+  text-wrap: balance;
+  /* evita líneas huérfanas */
+  overflow-wrap: anywhere;
+  /* defensa ante nombres muy largos */
+}
+
+.title-perfil {
+  font-size: clamp(1.375rem, 1.1rem + 1.2vw, 2.25rem);
+}
+
+/* Separa el rol del saludo sin necesidad de <br> */
+.title-perfil+.title-perfil {
+  margin-top: 0.25rem;
+  font-size: clamp(1.25rem, 1rem + 1.1vw, 1.875rem);
+}
+
+.title-table {
+  padding: 0 8px;
+  font-size: clamp(1.125rem, 0.95rem + 0.9vw, 1.875rem);
+}
+
+@media (min-width: 576px) {
+
+  .title-perfil,
+  .title-table {
+    padding: 0;
+    text-align: left;
+  }
+}
+
+/* =========================
+   Tabla
+   ========================= */
+.table-responsive {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: $sombra-card;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  /* Evita que las columnas se aplasten: en pantallas chicas se hace scroll horizontal */
+  min-width: 700px;
+  margin-bottom: 0;
+  font-family: Nexa;
+  color: $color-texto;
+
+  th {
+    font-family: Nexa-Bold;
+    font-size: 1rem;
+    white-space: nowrap;
+    border-bottom-color: $color-texto;
+  }
+
+  td {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 576px) {
+  .table {
+    th {
+      font-size: 1.125rem;
+    }
+
+    td {
+      font-size: 0.95rem;
+    }
+  }
+}
+
+/* =========================
+   Acciones (editar / eliminar)
+   ========================= */
+.td-editar {
+  --accion: #{$color-editar};
+  --accion-hover: #{$color-editar-hover};
+}
+
+.td-eliminar {
+  --accion: #{$color-eliminar};
+  --accion-hover: #{$color-eliminar-hover};
+}
+
+.td-editar,
+.td-eliminar {
+  button {
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--accion);
+    transition: color 0.15s, transform 0.15s;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--accion-hover);
+      /* transform en lugar de font-size para no mover el resto de la fila */
+      transform: scale(1.2);
+    }
+  }
+}
+
+/* =========================
+   Alertas
+   ========================= */
+.alert-warning {
+  width: 100%;
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  font-family: Nexa;
+  font-size: 1rem;
+  color: $color-texto;
+  text-align: center;
+  background: #FFF3CD;
+  border-radius: 12px;
+  box-shadow: $sombra-card;
+}
