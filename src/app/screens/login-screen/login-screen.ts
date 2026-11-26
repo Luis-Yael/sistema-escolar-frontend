@@ -3,6 +3,8 @@ import { SHARED_IMPORTS } from '../../shared/shared.imports';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { NotificationService } from '../../services/tools/notification-service';
+import { mensajeError } from '../../shared/mensaje-error';
+import { ErroresFormulario } from '../../interfaces/usuarios.interfaces';
 
 @Component({
   selector: 'app-login-screen',
@@ -15,7 +17,7 @@ export class LoginScreen implements OnInit {
   public username: string = '';
   public password: string = '';
   public load: boolean = false;
-  public errors: any = {};
+  public errors: ErroresFormulario = {};
 
   // Tipo de campo para la contraseña
   public typeInput: 'password' | 'text' = 'password';
@@ -55,8 +57,10 @@ export class LoginScreen implements OnInit {
       }, (error) => {
          this.load = false;
         // Mostrar mensaje de error
-        this.notificationService.error("Error en el login: " + error.message);
-        this.errors.general = "Credenciales inválidas. Por favor, inténtalo de nuevo.";
+        // El backend explica el motivo: credenciales incorrectas, usuario sin rol o sin perfil
+        const mensaje = mensajeError(error, 'Credenciales inválidas. Por favor, inténtalo de nuevo.');
+        this.notificationService.error(mensaje);
+        this.errors.general = mensaje;
       }
     );
 

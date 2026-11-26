@@ -1,26 +1,18 @@
 <div class="wrapper">
-  <div class="section-home">
-    <div class="body-home">
-      @switch (rol) {
-        <!-- Home para el admin -->
-        @case ('administrador') {
-          <section class="home-admin">
-            <app-admin-screen></app-admin-screen>
-          </section>
-        }
-        <!-- Home para el alumno -->
-        @case ('alumno') {
-          <section class="home-alumno">
-            <app-alumnos-screen></app-alumnos-screen>
-          </section>
-        }
-        <!-- Home para el maestro -->
-        @case ('maestro') {
-          <section class="home-maestro">
-            <app-maestros-screen></app-maestros-screen>
-          </section>
-        }
-      }
-    </div>
-  </div>
+  <app-page-header [nombre]="name_user" [rol]="rol"></app-page-header>
+
+  <!-- Accesos rápidos según el rol del usuario -->
+  <section class="accesos-grid" aria-label="Accesos rápidos">
+    @for (acceso of accesos; track acceso.ruta) {
+      <a class="acceso-link" [routerLink]="acceso.ruta">
+        <mat-card class="acceso-card">
+          <mat-card-content>
+            <mat-icon class="acceso-icono">{{ acceso.icono }}</mat-icon>
+            <h2 class="acceso-titulo">{{ acceso.titulo }}</h2>
+            <p class="acceso-descripcion">{{ acceso.descripcion }}</p>
+          </mat-card-content>
+        </mat-card>
+      </a>
+    }
+  </section>
 </div>

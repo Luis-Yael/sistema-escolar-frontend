@@ -3,7 +3,8 @@ import { SHARED_IMPORTS } from '../../shared/shared.imports';
 import { Location } from '@angular/common';
 import { AdministradoresService } from '../../services/administradores-service';
 //Importar la interfaz de datos del administrador
-import { DatosAdministrador } from '../../interfaces/usuarios.interfaces';
+import { DatosAdministrador, ErroresFormulario } from '../../interfaces/usuarios.interfaces';
+import { mensajeError } from '../../shared/mensaje-error';
 import { NotificationService } from '../../services/tools/notification-service';
 
 @Component({
@@ -27,8 +28,8 @@ export class RegistroAdmin implements OnInit {
 
 
   //Declarar las variables para el formulario de registro
-  public admin: any = {};
-  public errors: any = {};
+  public admin: DatosAdministrador = this.administradoresService.esquemaAdmin();
+  public errors: ErroresFormulario = {};
   public editar: boolean = false;
   public idUser: number = 0;
 
@@ -42,7 +43,6 @@ export class RegistroAdmin implements OnInit {
 
   ngOnInit(): void {
     //Si el rol es administrador, se inicializa el objeto admin con los datos del usuario
-    this.admin = this.administradoresService.esquemaAdmin();
     this.admin.rol = this.rol || 'administrador';
     console.log('Datos del administrador:', this.admin);
   }
@@ -104,7 +104,7 @@ export class RegistroAdmin implements OnInit {
         this.regresar();
       }, (error) => {
         console.error('Error al registrar el administrador:', error);
-        this.notificationService.error('Error al registrar el administrador');
+        this.notificationService.error(mensajeError(error, 'Error al registrar el administrador'));
       }
     )
   }

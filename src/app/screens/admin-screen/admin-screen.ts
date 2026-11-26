@@ -1,13 +1,18 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import { SHARED_IMPORTS } from '../../shared/shared.imports';
+import { PageHeader } from '../../partials/page-header/page-header';
 import { AuthService } from '../../services/auth-service';
 import { AdministradoresService } from '../../services/administradores-service';
 import { NotificationService } from '../../services/tools/notification-service';
+import { AdministradorApi } from '../../interfaces/usuarios.interfaces';
 
 @Component({
   selector: 'app-admin-screen',
-  imports: [],
+  imports: [...SHARED_IMPORTS, PageHeader],
   templateUrl: './admin-screen.html',
   styleUrl: './admin-screen.scss',
 })
@@ -18,26 +23,45 @@ export class AdminScreen implements OnInit {
   private router = inject(Router);
 
   public name_user: string = '';
-  // Lista de administradores y bandera de carga como signals: el template se actualiza al cambiar su valor
-  public lista_admins = signal<any[]>([]);
-  public cargando = signal<boolean>(false);
+  public rol: string = '';
+  public cargando: boolean = false;
+
+  public displayedColumns: string[] = [
+    'clave_admin',
+    'nombre',
+    'email',
+    'rfc',
+    'ocupacion',
+    'editar',
+    'eliminar'
+  ];
+
+  public dataSource = new MatTableDataSource<AdministradorApi>([]);
+
+  // La tabla está dentro de un @if, por eso el paginador se asigna cuando aparece en la vista
+  @ViewChild(MatPaginator) set paginator(paginator: MatPaginator | undefined) {
+    if (paginator) {
+      this.dataSource.paginator = paginator;
+    }
+  }
 
   ngOnInit(): void {
-    // El nombre se toma de la cookie de sesión guardada al iniciar sesión
+    // El nombre y el rol se toman de las cookies de sesión guardadas al iniciar sesión
     this.name_user = this.authService.getUserCompleteName();
+    this.rol = this.authService.getUserRole();
     // Se obtiene la lista de administradores al cargar la pantalla
     this.obtenerAdmins();
   }
 
-  // Obtiene la lista de administradores y actualiza los signals que lee el template
+  // Obtiene la lista de administradores y la asigna a la tabla
   public obtenerAdmins(): void {
-    this.cargando.set(true);
+    this.cargando = true;
     this.administradoresService.obtenerListaAdmins().pipe(
-      finalize(() => this.cargando.set(false))
+      finalize(() => this.cargando = false)
     ).subscribe({
       next: (response) => {
-        this.lista_admins.set(response);
-        console.log('Lista de administradores:', this.lista_admins());
+        this.dataSource.data = response;
+        console.log('Lista de administradores:', response);
       },
       error: () => this.notificationService.error('No se pudo obtener la lista de administradores'),
     });
